@@ -2,12 +2,13 @@
 
 namespace App\Http\Controllers\Auth;
 
-use App\Http\Controllers\Controller;
-use App\Providers\RouteServiceProvider;
+use App\Models\Rol;
 use App\Models\User;
-use Illuminate\Foundation\Auth\RegistersUsers;
+use App\Http\Controllers\Controller;
 use Illuminate\Support\Facades\Hash;
+use App\Providers\RouteServiceProvider;
 use Illuminate\Support\Facades\Validator;
+use Illuminate\Foundation\Auth\RegistersUsers;
 
 class RegisterController extends Controller
 {
@@ -51,7 +52,14 @@ class RegisterController extends Controller
     {
         return Validator::make($data, [
             'name' => ['required', 'string', 'max:255'],
-            'email' => ['required', 'string', 'email', 'max:255', 'unique:users'],
+            'lastname' => ['required', 'string', 'max:255'],
+            'nickname' => ['required', 'string', 'max:100', 'min:5'],
+
+            'email' => ['nullable','string', 'email', 'max:255', 'unique:users'],
+            'birthdate' => ['required','date'],
+            'rol' => ['required','not_in:Elegir'],//no aceptar Elegir
+            'gender' => ['required','in:M,F'],//Solo aceptar esos dos valores
+
             'password' => ['required', 'string', 'min:8', 'confirmed'],
         ]);
     }
@@ -64,8 +72,19 @@ class RegisterController extends Controller
      */
     protected function create(array $data)
     {
+        $rol = Rol::create([
+            'Administrator' => $data['rol'] == 'Administrador' ? true : false,
+            'Medico' => $data['rol'] == 'Medico' ? true : false,
+            'Paciente' => $data['rol'] == 'Paciente' ? true : false
+        ]);
+
         return User::create([
             'name' => $data['name'],
+            'lastname' => $data['lastname'],
+            'nickname' => $data['nickname'],
+            'birthdate' => $data['birthdate'],
+            'gender' => $data['gender'],
+            'role_id' => $rol->id,
             'email' => $data['email'],
             'password' => Hash::make($data['password']),
         ]);
