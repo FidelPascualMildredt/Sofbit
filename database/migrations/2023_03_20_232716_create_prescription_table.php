@@ -19,7 +19,7 @@ class CreatePrescriptionTable extends Migration
             $table->foreign('consults_id')->references('id')->on('consults');
             $table->string('medicament');
             $table->char('quantity');
-            $table->text('note');
+            $table->text('note')->nullable();
             $table->char('hour');
             $table->char('time');
             $table->timestamps();

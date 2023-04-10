@@ -66,8 +66,20 @@ class User extends Authenticatable
         }
     }
 
+    // public function rol()
+    // {
+    //     return $this->hasOne(Rol::class,'id','role_id');
+    // }
     public function rol()
     {
-        return $this->hasOne(Rol::class,'id','role_id');
+        return $this->belongsTo(Rol::class,'role_id', 'id');
     }
+
+    public function consult()
+    {
+        return $this->hasOne(Consult::class,'consults_id', 'id');
+    }
+
+
+
 }

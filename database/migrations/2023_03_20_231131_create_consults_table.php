@@ -21,10 +21,10 @@ class CreateConsultsTable extends Migration
             $table->foreign('paciente_id')->references('id')->on('users');
             $table->dateTime('date');
             $table->text('description');
-            $table->decimal('height',5,4);
-            $table->decimal('temperature',5,4);
-            $table->decimal('weight',5,4);
-            $table->decimal('pressure',5,4);
+            $table->decimal('height',10,4);
+            $table->decimal('temperature',10,4);
+            $table->decimal('weight',10,4);
+            $table->decimal('pressure',10,4);
 
             // $table->boolean('Administrator')->default(0);
             $table->timestamps();

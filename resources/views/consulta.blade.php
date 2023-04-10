@@ -61,6 +61,7 @@
 @endsection
 
 @push('scripts')
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.2.1/dist/chart.umd.min.js "> </script>
     <script>
         $(document).ready(function() {
             $("#paciente").on('change', function() {
@@ -72,9 +73,8 @@
                     $("#contenedor_info").load('js_paciente_info?paciente_id=' + paciente_id);
                 }
             });
-
-
         });
     </script>
+
 
 @endpush

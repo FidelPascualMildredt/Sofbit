@@ -1,4 +1,5 @@
     <div class="row" >
+        
         <div class="col-md-6">
             <h5 class="card-title placeholder-glow">
                 <span class="placeholder col-6"></span>

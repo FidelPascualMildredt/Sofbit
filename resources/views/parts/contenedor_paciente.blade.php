@@ -1,4 +1,5 @@
 <div class="row" >
+
     <div class="col-md-6">
         <div class="card">
             <div class="card-body">
@@ -64,9 +65,13 @@
                 <label for="tiempo" class="form-label">Tiempo</label>
                 <input type="text" class="form-control" id="tiempo" placeholder="Durante una semana">
             </div>
+            <div class="col-12 mb-3">
+                <label for="nota" class="form-label">Nota</label>
+                <textarea name="nota" class="form-control" id="nota" rows="2"></textarea>
+            </div>
 
             <div>
-                <button type="button" class="btn btn-success">Limpiar</button>
+                <button onclick="limpiarFormMedicameto()" type="button" class="btn btn-success">Limpiar</button>
                 <button type="button" class="btn btn-primary" id="agregar">Agregar</button>
             </div>
         </div>
@@ -78,11 +83,12 @@
 <table class="table" id="tabla_medicamentos">
     <thead>
         <tr>
-            <th scope="col">#</th>
+            {{--  <th scope="col">#</th>  --}}
             <th scope="col">Medicamento</th>
             <th scope="col">Dosis</th>
             <th scope="col">Hora</th>
             <th scope="col">Tiempo</th>
+            <th scope="col">Nota</th>
             <th scope="col">Acción</th>
         </tr>
     </thead>
@@ -91,31 +97,144 @@
     </tbody>
 </table>
 
+<button type="button" class="btn btn-primary" id="guardar">Guardar</button>
+
+
+
 
 <script>
+    // declaramos Variables de forma global
     let medicamento='';
     let dosis='';
     let hora='';
     let tiempo='';
-    $(document).ready(function() {
+    let nota='';
+    let descripcion='';
+    let dataFormulario='';
 
+    $(document).ready(function() {
+        $.ajaxSetup({
+            headers: {
+                'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
+            }
+        });
+
+        $(document).on('click', '.borrar', function (event) {
+            event.preventDefault();
+            if(confirm("Esta seguro que desa eliminar el medicamento?")){
+                $(this).closest('tr').remove();
+            }
+        });
+
+        $('#guardar').click(function(){
+            descripcion = document.getElementById('descripcion').value;
+            //console.log('descripcion '+ descripcion);
+            if(validateSave()){
+                getDataSave();
+                $.ajax({
+                    url:'/guardarDatosReceta',
+                    data:dataFormulario,
+                    type:'post',
+                    success: function (response) {
+                        //resetUI();
+                        window.location.reload();
+                        alert(response.success);
+                    },
+                    statusCode: {
+                        404: function() {
+                            alert('web not found');
+                        }
+                    },
+                    error:function(x,xs,xt){
+                        //nos dara el error si es que hay alguno
+                        window.open(JSON.stringify(x));
+                        //alert('error: ' + JSON.stringify(x) +"\n error string: "+ xs + "\n error throwed: " + xt);
+                    }
+                });
+            }
+        });
+
+
+        function getDataSave(){
+            var data = [];
+            var paciente_id = $('#paciente').find(":selected").val();
+
+            $('#tabla_medicamentos tr').each(function(){
+                /* Obtener todas las celdas */
+                var celdas = $(this).find('td');
+
+                var dataExtracts = [];
+                /* Mostrar el valor de cada celda */
+                celdas.each(function(){
+                    dataExtracts.push($(this).html());
+                });
+                dataExtracts.pop()
+
+                data.push(dataExtracts);
+                //console.log(dataExtracts);
+
+            });
+            data.shift()
+
+
+            dataFormulario = {
+                'paciente_id':paciente_id,
+                'descripcion':descripcion,
+                'medicamentos':data
+            };
+            //console.log(dataFormulario);
+        }
+
+        function validateSave(){
+            let messages='';
+            //console.log(medicamento)
+            var nFilas = $("#tabla_medicamentos tr").length;
+
+            if(descripcion == ''){
+                messages = "El campo descripción esta vacio\n"
+            }
+
+
+            if(nFilas == 1){
+                messages += "No ha agregado ningún medicamento";
+            }
+
+
+            if(messages == ''){
+                return true;
+            }else{
+                alert(messages);
+                return false;
+            }
+        }
 
         $('#agregar').click(function(){
 
+            if(validate()){
+                var table = document.getElementById("tabla_medicamentos");
+                var row = table.insertRow(-1);
+                 //this adds row in 0 index i.e. first place
+                row.innerHTML = '<td>'+medicamento+'</td>'+
+                '<td>'+dosis+'</td>'+
+                '<td>'+hora+'</td>'+
+                '<td>'+tiempo+'</td>'+
+                '<td>'+nota+'</td>'+
+                '<td><button class="btn btn-danger borrar">Eliminar</button></td>';
 
-            validate();
+                limpiarFormMedicameto();
+            }
         });
 
         function getData(){
-            let medicamento = document.getElementById('medicamento').value;
-            let dosis = document.getElementById('dosis').value;
-            let hora = document.getElementById('hora').value;
-            let tiempo = document.getElementById('tiempo').value;
-            console.log('Medicamento '+ medicamento);
-            console.log('dosis '+ dosis);
-            console.log('hora '+ hora);
-            console.log('tiempo '+ tiempo);
-
+             medicamento = document.getElementById('medicamento').value;
+            dosis = document.getElementById('dosis').value;
+            hora = document.getElementById('hora').value;
+            tiempo = document.getElementById('tiempo').value;
+            nota = document.getElementById('nota').value;
+            //console.log('Medicamento '+ medicamento);
+            //console.log('dosis '+ dosis);
+            //console.log('hora '+ hora);
+            //console.log('tiempo '+ tiempo);
         };
 
         //----------
@@ -123,7 +242,7 @@
 
             getData();
             let messages='';
-            console.log(medicamento)
+            //console.log(medicamento)
 
             if(medicamento == ''){
                 messages = "El campo medicamento esta vacio\n"
@@ -141,6 +260,7 @@
                 messages += "El campo tiempo esta vacio\n"
             }
 
+
             if(messages == ''){
                 return true;
             }else{
@@ -150,5 +270,23 @@
         }
 
     });
+
+    function resetVariables(){
+        dataFormulario = "";
+        medicamento = "";
+        dosis = "";
+        hora = "";
+        tiempo = "";
+        nota = "";
+    }
+
+    function limpiarFormMedicameto(){
+        resetVariables();
+        document.getElementById('medicamento').value="";
+        document.getElementById('dosis').value="";
+        document.getElementById('hora').value="";
+        document.getElementById('tiempo').value="";
+        document.getElementById('nota').value="";
+    }
 
 </script>
