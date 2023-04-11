@@ -1,9 +1,11 @@
 <?php
 
-use App\Http\Controllers\MedicoController;
+use App\Models\User;
+use Barryvdh\DomPDF\Facade\Pdf;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\RolControler;
 use App\Http\Controllers\UserController;
+use App\Http\Controllers\MedicoController;
 use App\Http\Controllers\ConsultController;
 use App\Http\Controllers\PrescriptionController;
 /*
@@ -19,6 +21,24 @@ use App\Http\Controllers\PrescriptionController;
 
 Route::get('/', function () {
     return view('dashboard');
+});
+
+Route::get('/pdf', function () {
+    // $users = User::all();
+    // // dd($datos);
+    // $data = [
+    //     'title' => 'Lista de usuarios',
+    //     'date' => date('m/d/Y'),
+    //     'users' => $users
+    // ];
+
+
+    // // view()->share('employee',$datos);
+    // $pdf = Pdf::loadView('prescriptions.pdf.receta');
+    // return $pdf->download('invoice.pdf');
+    // $pdf = Pdf::loadView('prescriptions.pdf.receta',$data);
+    // return $pdf->download('invoice.pdf');
+    return view('prescriptions.pdf.receta');
 });
 
 Auth::routes();
